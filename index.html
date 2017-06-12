@@ -128,13 +128,27 @@
         name: name,
         role: role,
         start: start,
-        frequency: frequency
+        frequency: frequency,
+        time: currentTime
       });
 
       $("#trainName").text('');
       $("#destination").text('');
       $("#firstTrain").text('');
       $("#frequency").text('');
+      $("#nextTrain").text('');
+    });
+
+    database.ref().on("child_added", function(childSnapshot) {
+      
+      // full list of items to the well
+      $("#jobRows").append("<tr><th id='name'> " + childSnapshot.val().name +
+        " </th><th id='roly'> " + childSnapshot.val().role +
+        " </th><th id='starty'> " + childSnapshot.val().srart +
+        " </th><th id='frequencyy'> " + childSnapshot.val().frequency + " </th></tr>");
+    // Handle the errors
+    }, function(errorObject) {
+      console.log("Errors handled: " + errorObject.code);
     });
     
     database.ref().on('child_added',function getData(){
@@ -166,16 +180,17 @@
       var lastObj = sv[lastKey]
 
     //   // Console.loging the last user's data
-       console.log(lastObj.name);
-       console.log(lastObj.role);
-       console.log(lastObj.start);
-       console.log(lastObj.frequency);
+      console.log(lastObj.name);
+      console.log(lastObj.role);
+      console.log(lastObj.start);
+      console.log(lastObj.frequency);
 
     //   // Change the HTML to reflect
         $("#namey").html(lastObj.name);
         $("#destinationey").html(lastObj.role);
         $("#startey").html(lastObj.start);
-        $("#frequencyey").html(lastObj.frequency);   
+        $("#frequencyey").html(lastObj.frequency); 
+        $("#nextTrain").html(lastObj.time);
         // Handle the errors
        }, function(errorObject) {
          console.log("Errors handled: " + errorObject.code);

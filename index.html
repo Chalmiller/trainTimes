@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Train Scheduler</title>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- custom css -->
+
+    <!-- firebase link -->
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Jumbotron -->
+        <div class="jumbotron">
+            <h1 class="text-center warning">Train Time Predictor</h1>
+            <h3 class="text-center">Live Tracking your Train Arrival Times</h3>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-warning">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Current Train Schedule</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Train Name</th>
+                                    <th>Destination</th>
+                                    <th>Frequency</th> 
+                                    <th>Next Arrival</th>
+                                    <th>Minutes Away</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobRows">
+                              <tr>
+                                <th id="namey"></th>
+                                <th id="destinationey"></th>
+                                <th id="frequencyey"></th>
+                                <th id="startey"></th>
+                                <th id='nextTrain'></th>
+                              </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel panel-warning">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Submit</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="trainName">Train Name</label>
+                                <input type="text" class="form-control" id="trainName">
+                            </div>
+                            <div class="form-group">
+                                <label for="destination">Destination</label>
+                                <input type="text" class="form-control" id="destination">
+                            </div>
+                            <div class="form-group">
+                                <label for="startTime">First Train</label>
+                                <input type="text" class="form-control" id="firstTrain">
+                            </div>
+                            <div class="form-group">
+                                <label for="frequency">Frequency</label>
+                                <input type="text" class="form-control" id="frequency">
+                            </div>
+                            <button type="submit" class="btn btn-warning" id="submitData">Submit</button>
+                        </form>
+                    </div>
+                </div>
+              <div id='employees'>
+                
+              </div>
+            </div>
+        </div>
+    </div>
+    <!-- scripts -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.14.1/moment.min.js" type="text/javascript"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase.js"></script>
+  
+  <script>
+  
+  var config = {
+    apiKey: "AIzaSyBzkms0BDDWk8GbH2d0sl394Gn2dtBD63A",
+    authDomain: "szfirebase-b1389.firebaseapp.com",
+    databaseURL: "https://szfirebase-b1389.firebaseio.com",
+    projectId: "szfirebase-b1389",
+    storageBucket: "szfirebase-b1389.appspot.com",
+    messagingSenderId: "201635166904"
+  };
+  firebase.initializeApp(config);
+
+    // Create a variable to reference the database.
+    var database = firebase.database();
+
+
+    // // Initial Values
+    var name = "";
+    var role = "";
+    var start = 0;
+    var frequency = "";
+    var currentTime = moment();
+
+
+    // Capture Button Click
+    $("#submitData").on("click", function(event) {
+      event.preventDefault();
+
+      // Grabbed values from text boxes
+      name = $("#trainName").val().trim();
+      role = $("#destination").val().trim();
+      start = $("#firstTrain").val().trim();
+      frequency = $("#frequency").val().trim();
+
+      // var firstTimeConverted = moment(start, "hh:mm").subtract(1, "years");
+      // var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+      // var tRemainder = diffTime % frequency;
+      // var tMinutesTillTrain = frequency - tRemainder;
+      // var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+
+    //   // Code for handling the push
+      database.ref().push({
+        name: name,
+        role: role,
+        start: start,
+        frequency: frequency
+      });
+
+      $("#trainName").text('');
+      $("#destination").text('');
+      $("#firstTrain").text('');
+      $("#frequency").text('');
+    });
+    
+    database.ref().on('child_added',function getData(){
+      $('#trainName').append('<h1>'+database.ref().child().name+'</h1>');
+    }, function error(){
+      console.log('error');
+    });
+
+    // TO DO:
+//     Change ID's
+//     Add the on child_added and on value
+//     Sort by date added
+    
+    // Firebase watcher + initial loader HINT: .on("value")
+    database.ref().on("value", function(snapshot) {
+
+    //   // storing the snapshot.val() in a variable for convenience
+      var sv = snapshot.val();
+      
+    //   // Getting an array of each key In the snapshot object
+      var svArr = Object.keys(sv);
+
+    //   // Finding the last user's key
+      var lastIndex = svArr.length - 1;
+
+      var lastKey = svArr[lastIndex];
+
+    //   // Using the last user's key to access the last added user object
+      var lastObj = sv[lastKey]
+
+    //   // Console.loging the last user's data
+       console.log(lastObj.name);
+       console.log(lastObj.role);
+       console.log(lastObj.start);
+       console.log(lastObj.frequency);
+
+    //   // Change the HTML to reflect
+        $("#namey").html(lastObj.name);
+        $("#destinationey").html(lastObj.role);
+        $("#startey").html(lastObj.start);
+        $("#frequencyey").html(lastObj.frequency);   
+        // Handle the errors
+       }, function(errorObject) {
+         console.log("Errors handled: " + errorObject.code);
+       });
+  </script>
+
+</body>
+
+</html>
+
